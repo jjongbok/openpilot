@@ -162,7 +162,7 @@ typedef struct UIScene {
   float max_distance;
 
   // lead
-  QPointF lead_vertices[2];
+  QPointF lead_vertices[4];
   bool lead_radar[2] = {false, false};
   std::vector<lead_vertex_data> lead_vertices_side;
   // DMoji state
