@@ -126,6 +126,8 @@ class Controls:
         self.disengage_on_accelerator = False
         self.params.put_bool("DisengageOnAccelerator", False)
 
+    self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX
+
     # read params
     self.is_metric = self.params.get_bool("IsMetric")
     self.is_ldw_enabled = self.params.get_bool("IsLdwEnabled")

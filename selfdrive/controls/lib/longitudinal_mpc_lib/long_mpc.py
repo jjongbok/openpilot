@@ -306,6 +306,8 @@ class LongitudinalMpc:
     self.reset()
     self.source = SOURCES[2]
 
+    self.t_follow = 1.45
+
   def reset(self):
     # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.solver.reset()
@@ -412,12 +414,6 @@ class LongitudinalMpc:
     lead_xv = self.extrapolate_lead(x_lead, v_lead, a_lead, a_lead_tau)
     return lead_xv
 
-  def set_accel_limits(self, min_a, max_a):
-    # TODO this sets a max accel limit, but the minimum limit is only for cruise decel
-    # needs refactor
-    self.cruise_min_a = min_a
-    self.max_a = max_a
-
   def update_tf(self, v_ego, t_follow):
     t_follow = interp(v_ego * CV.MS_TO_KPH, [0, 40, 100], [t_follow, t_follow + self.tFollowSpeedAddM, t_follow + self.tFollowSpeedAdd]) 
     #t_follow = interp(v_ego * CV.MS_TO_KPH, [0, 100], [t_follow, t_follow + self.tFollowSpeedAdd])
@@ -428,14 +424,20 @@ class LongitudinalMpc:
     self.v_ego_prev = v_ego
     return np.full(N+1, t_follow)
 
-  def update(self, sm, reset_state, carrot_light_detect, radarstate, v_cruise, x, v, a, j, have_lead, aggressive_acceleration, increased_stopping_distance, smoother_braking, custom_personalities, aggressive_follow, standard_follow, relaxed_follow, personality=log.LongitudinalPersonality.standard):
+  def set_accel_limits(self, min_a, max_a):
+    # TODO this sets a max accel limit, but the minimum limit is only for cruise decel
+    # needs refactor
+    self.cruise_min_a = min_a
+    self.max_a = max_a
+
+  def update(self, sm, reset_state, carrot_light_detect, radarstate, v_cruise, x, v, a, j, aggressive_acceleration, increased_stopping_distance, smoother_braking, custom_personalities, aggressive_follow, standard_follow, relaxed_follow, personality=log.LongitudinalPersonality.standard):
     #self.debugLongText = "v_cruise ={:.1f}".format(v_cruise)
     carstate = sm['carState']
     model = sm['modelV2']
 
     self.update_params()
     t_follow = get_T_FOLLOW(custom_personalities, aggressive_follow, standard_follow, relaxed_follow, personality)
-
+    self.t_follow = t_follow
     v_ego = self.x0[1]
     a_ego = self.x0[2]
     self.trafficState = TrafficState.off
@@ -453,21 +455,22 @@ class LongitudinalMpc:
     # Offset by FrogAi for FrogPilot for a more natural takeoff with a lead
     if aggressive_acceleration:
       distance_factor = np.maximum(1, lead_xv_0[:,0] - (lead_xv_0[:,1] * t_follow))
-      t_follow_offset = np.clip((lead_xv_0[:,1] - v_ego), 1, distance_factor)
+      standstill_offset = max(STOP_DISTANCE - v_ego, 0)
+      t_follow_offset = np.clip((lead_xv_0[:,1] - v_ego + standstill_offset), 1, distance_factor)
       t_follow = t_follow / t_follow_offset
 
     # Offset by FrogAi for FrogPilot for a more natural approach to a slower lead
     if smoother_braking:
-      distance_factor = np.maximum(1, lead_xv_0[:,0] - (lead_xv_0[:,1] * t_follow)) 
+      distance_factor = np.maximum(1, lead_xv_0[:,0] - (lead_xv_0[:,1] * t_follow))
       t_follow_offset = np.clip((v_ego - lead_xv_0[:,1]) - COMFORT_BRAKE, 1, distance_factor)
       t_follow = t_follow / t_follow_offset
 
     # LongitudinalPlan variables for onroad driving insights
-    self.safe_obstacle_distance = float(np.mean(get_safe_obstacle_distance(v_ego, t_follow))) if have_lead else 0
-    self.stopped_equivalence_factor = float(np.mean(get_stopped_equivalence_factor(v_ego, lead_xv_0[:,1], increased_stopping_distance))) if have_lead else 0
+    self.safe_obstacle_distance = float(np.mean(get_safe_obstacle_distance(v_ego, t_follow))) if self.status else 0
+    self.stopped_equivalence_factor = float(np.mean(get_stopped_equivalence_factor(v_ego, lead_xv_0[:,1], increased_stopping_distance))) if self.status else 0
 
-    self.safe_obstacle_distance_stock = float(np.mean(get_safe_obstacle_distance(v_ego, get_T_FOLLOW(custom_personalities, aggressive_follow, standard_follow, relaxed_follow, personality)))) if have_lead else 0
-    self.stopped_equivalence_factor_stock = float(np.mean(get_stopped_equivalence_factor(v_ego, lead_xv_0[:,1], False))) if have_lead else 0
+    self.safe_obstacle_distance_stock = float(np.mean(get_safe_obstacle_distance(v_ego, get_T_FOLLOW(custom_personalities, aggressive_follow, standard_follow, relaxed_follow, personality)))) if self.status else 0
+    self.stopped_equivalence_factor_stock = float(np.mean(get_stopped_equivalence_factor(v_ego, lead_xv_0[:,1], False))) if self.status else 0
 
     # To estimate a safe distance from a moving lead, we calculate how much stopping
     # distance that lead needs as a minimum. We can add that to the current distance

@@ -70,7 +70,7 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(SettingsWindow *parent) : ListWidge
 
     } else if (param == "ModelUI") {
       ParamManageControl *modelUIToggle = new ParamManageControl(param, title, desc, icon, this);
-      connect(modelUIToggle, &ParamManageControl::manageButtonClicked, this, [this]() {
+      QObject::connect(modelUIToggle, &ParamManageControl::manageButtonClicked, this, [this]() {
         parentToggleClicked();
         for (auto &[key, toggle] : toggles) {
           toggle->setVisible(modelUIKeys.find(key.c_str()) != modelUIKeys.end());

@@ -1,5 +1,4 @@
 #include "selfdrive/ui/qt/widgets/scrollview.h"
-#include "selfdrive/ui/ui.h"
 
 #include <QScrollBar>
 #include <QScroller>
@@ -43,12 +42,8 @@ ScrollView::ScrollView(QWidget *w, QWidget *parent) : QScrollArea(parent) {
   sp.setScrollMetric(QScrollerProperties::MousePressEventDelay, 0.01);
   scroller->grabGesture(this->viewport(), QScroller::LeftMouseButtonGesture);
   scroller->setScrollerProperties(sp);
-
-  QObject::connect(device(), &Device::interactiveTimeout, this, [=]() {
-    resetScrollbarPosition();
-  });
 }
 
-void ScrollView::resetScrollbarPosition() {
+void ScrollView::hideEvent(QHideEvent *e) {
   verticalScrollBar()->setValue(0);
 }

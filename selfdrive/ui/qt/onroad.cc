@@ -819,10 +819,10 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   painter.setBrush(bs);
   if (blindSpotLeft) {
-    painter.drawPolygon(scene.track_left_adjacent_lane_vertices);
+    painter.drawPolygon(scene.track_adjacent_vertices[4]);
   }
   if (blindSpotRight) {
-    painter.drawPolygon(scene.track_right_adjacent_lane_vertices);
+    painter.drawPolygon(scene.track_adjacent_vertices[5]);
   }
 
   // paint adjacent lane paths
@@ -864,8 +864,8 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
     };
 
     // Paint lanes
-    paintLane(painter, scene.track_left_adjacent_lane_vertices, laneWidthLeft, blindSpotLeft);
-    paintLane(painter, scene.track_right_adjacent_lane_vertices, laneWidthRight, blindSpotRight);
+    paintLane(painter, scene.track_adjacent_vertices[4], laneWidthLeft, blindSpotLeft);
+    paintLane(painter, scene.track_adjacent_vertices[5], laneWidthRight, blindSpotRight);
   }
 
   painter.restore();
@@ -956,6 +956,7 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
     QString unit_s = "km/h";
     float distance = d_rel;
     float lead_speed = std::max(lead_data.getVLead(), 0.0f);  // Ensure speed doesn't go under 0 m/s cause that's dumb
+    float yRel = lead_data.getYRel();
 
     // Conversion factors and units
     constexpr float toFeet = 3.28084f;
@@ -977,11 +978,13 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
     painter.setPen(Qt::white);
     painter.setFont(InterFont(35, QFont::Bold));
 
-    const QString text = QString("%1 %2 | %3 %4")
-                        .arg(distance, 0, 'f', 2, '0')
-                        .arg(unit_d)
-                        .arg(lead_speed, 0, 'f', 2, '0')
-                        .arg(unit_s);
+    const QString text = QString("%1 %2 | %3 %4 | %5 %6")
+                            .arg(distance, 0, 'f', 2, '0')
+                            .arg(unit_d)
+                            .arg(lead_speed, 0, 'f', 2, '0')
+                            .arg(unit_s)
+                            .arg(yRel, 0, 'f', 2, '0')
+                            .arg("meters");
 
     // Calculate the text starting position
     const QFontMetrics metrics(painter.font());
@@ -1062,11 +1065,23 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
       update_leads(s, radar_state, model.getPosition());
       auto lead_one = radar_state.getLeadOne();
       auto lead_two = radar_state.getLeadTwo();
+      auto lead_left = radar_state.getLeadLeft();
+      auto lead_right = radar_state.getLeadRight();
       if (lead_one.getStatus()) {
         if(s->show_mode == 0) drawLead(painter, lead_one, s->scene.lead_vertices[0]);
       }
       if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
-        if(s->show_mode == 0) drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        if(s->show_mode == 0) {
+          drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        }
+      }
+      if(s->show_mode == 0) {
+        if (lead_left.getStatus()) {
+          drawLead(painter, lead_left, s->scene.lead_vertices[2]);
+        }
+        if (lead_right.getStatus()) {
+          drawLead(painter, lead_right, s->scene.lead_vertices[3]);
+        }
       }
     }
   }
