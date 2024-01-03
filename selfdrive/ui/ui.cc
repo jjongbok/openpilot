@@ -16,6 +16,26 @@
 #define BACKLIGHT_DT 0.05
 #define BACKLIGHT_TS 10.00
 
+// Projects a point in car to space to the corresponding point in full frame
+// image space.
+static bool calib_frame_to_full_frame(const UIState *s, float in_x, float in_y, float in_z, QPointF *out) {
+  const float margin = 500.0f;
+  const QRectF clip_region{-margin, -margin, s->fb_w + 2 * margin, s->fb_h + 2 * margin};
+
+  const vec3 pt = (vec3){{in_x, in_y, in_z}};
+  const vec3 Ep = matvecmul3(s->scene.wide_cam ? s->scene.view_from_wide_calib : s->scene.view_from_calib, pt);
+  const vec3 KEp = matvecmul3(s->scene.wide_cam ? ECAM_INTRINSIC_MATRIX : FCAM_INTRINSIC_MATRIX, Ep);
+
+  // Project.
+  QPointF point = s->car_space_transform.map(QPointF{KEp.v[0] / KEp.v[2], KEp.v[1] / KEp.v[2]});
+  if (clip_region.contains(point)) {
+    *out = point;
+    if(std::isnan(point.x()) || std::isnan(point.y())) return false;
+    return true;
+  }
+  return false;
+}
+
 template <class T>
 float interp(float x, std::initializer_list<T> x_list, std::initializer_list<T> y_list, bool extrapolate)
 {
@@ -292,26 +312,6 @@ void update_line_data_dist3(const UIState* s, const cereal::XYZTData::Reader& li
         }
     }
     *pvd = left_points + right_points;
-}
-
-// Projects a point in car to space to the corresponding point in full frame
-// image space.
-static bool calib_frame_to_full_frame(const UIState *s, float in_x, float in_y, float in_z, QPointF *out) {
-  const float margin = 500.0f;
-  const QRectF clip_region{-margin, -margin, s->fb_w + 2 * margin, s->fb_h + 2 * margin};
-
-  const vec3 pt = (vec3){{in_x, in_y, in_z}};
-  const vec3 Ep = matvecmul3(s->scene.wide_cam ? s->scene.view_from_wide_calib : s->scene.view_from_calib, pt);
-  const vec3 KEp = matvecmul3(s->scene.wide_cam ? ECAM_INTRINSIC_MATRIX : FCAM_INTRINSIC_MATRIX, Ep);
-
-  // Project.
-  QPointF point = s->car_space_transform.map(QPointF{KEp.v[0] / KEp.v[2], KEp.v[1] / KEp.v[2]});
-  if (clip_region.contains(point)) {
-    *out = point;
-    if(std::isnan(point.x()) || std::isnan(point.y())) return false;
-    return true;
-  }
-  return false;
 }
 
 int get_path_length_idx(const cereal::XYZTData::Reader &line, const float path_height) {
