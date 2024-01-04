@@ -355,9 +355,9 @@ def get_lead_side(v_ego, tracks, md, lane_width):
     ld = c.get_RadarState(c.vision_prob)
     if abs(d_y) < lane_width/2:
       leads_center[c.dRel] = ld
-    elif -lane_width * 3/2 < d_y < 0:
+    elif -lane_width < d_y < 0:
       leads_left[c.dRel] = ld
-    elif d_y < lane_width * 3 / 2:
+    elif d_y < lane_width:
       leads_right[c.dRel] = ld
 
   #ll,lr = [[l[k] for k in sorted(list(l.keys()))] for l in [leads_left,leads_right]]
