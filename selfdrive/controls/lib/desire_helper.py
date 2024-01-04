@@ -75,7 +75,17 @@ class DesireHelper:
     self.lane_available_prev = False
 
 
-  def update(self, carstate, modeldata, lateral_active, lane_change_prob, leftBlinkerExt, rightBlinkerExt):
+  def update(self, carstate, modeldata, lateral_active, lane_change_prob, sm):
+
+    radarState = sm['radarState']
+    self.leftSideObjectDist = 255
+    self.rightSideObjectDist = 255
+    if radarState.leadLeft.status:
+      self.leftSideObjectDist = radarState.leadLeft.dRel
+    if radarState.leadRight.status:
+      self.rightSideObjectDist = radarState.leadRight.dRel
+    leftBlinkerExt = sm['controlsState'].leftBlinkerExt
+    rightBlinkerExt = sm['controlsState'].rightBlinkerExt
     blinkerExtMode = int((leftBlinkerExt + rightBlinkerExt) / 20000)  ## 둘다 10000 or 20000이 + 되어 있으므로,, 10000이 아니라 20000으로 나누어야함.
     leftBlinkerExt %= 10000
     rightBlinkerExt %= 10000
@@ -142,12 +152,20 @@ class DesireHelper:
         blindspot_detected = ((carstate.leftBlindspot and self.lane_change_direction == LaneChangeDirection.left) or
                               (carstate.rightBlindspot and self.lane_change_direction == LaneChangeDirection.right))
 
+        object_dist = v_ego * 3.0
+        object_detected = ((self.leftSideObjectDist < object_dist and self.lane_change_direction == LaneChangeDirection.left) or
+                           (self.rightSideObjectDist < object_dist and self.lane_change_direction == LaneChangeDirection.right))
+
         # Conduct a nudgeless lane change if all the conditions are true
         self.lane_change_wait_timer += DT_MDL
         need_torque = False
         if (not carstate.leftBlinker and leftBlinkerExt > 0) or (not carstate.rightBlinker and rightBlinkerExt > 0):
           if not self.lane_available_prev and lane_available:
-            need_torque = False
+            if object_detected:
+              need_torque = True
+              self.lane_available_prev = False
+            else:
+              need_torque = False
           elif lane_available and blinkerExtMode > 0:  #0: voice etc, 1:noo helper lanechange, 2: noo helper turn
             need_torque = True
         if not need_torque and self.nudgeless and lane_available and not self.lane_change_completed and self.lane_change_wait_timer >= self.lane_change_delay:          

@@ -353,9 +353,9 @@ def get_lead_side(v_ego, tracks, md, lane_width):
     ld = c.get_RadarState(c.vision_prob)
     if abs(d_y) < lane_width/2:
       leads_center[c.dRel] = ld
-    elif d_y < 0:
+    elif -lane_width * 3/2 < d_y < 0:
       leads_left[c.dRel] = ld
-    else:
+    elif d_y < lane_width * 3 / 2:
       leads_right[c.dRel] = ld
 
   #ll,lr = [[l[k] for k in sorted(list(l.keys()))] for l in [leads_left,leads_right]]
@@ -368,8 +368,16 @@ def get_lead_side(v_ego, tracks, md, lane_width):
     lc = [leads_center[dRel_min]]
   else:
     lc = {}
+  leadLeft = {'status': False}
+  leadRight = {'status': False}
+  if leads_left:
+    dRel_min = min(leads_left.keys())
+    leadLeft = leads_left[dRel_min]
+  if leads_right:
+    dRel_min = min(leads_right.keys())
+    leadRight = leads_right[dRel_min]
   #lc = list(leads_center.values())
-  return [ll,lc,lr]
+  return [ll,lc,lr], leadLeft, leadRight
   #return [leads_left, leads_center, leads_right]
 
 def match_vision_track_apilot(v_ego, lead_msg, tracks, md, lane_width):
@@ -534,11 +542,11 @@ class RadarD:
       else:
         self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, low_speed_override=False, mixRadarInfo=self.mixRadarInfo)
         self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, low_speed_override=False, mixRadarInfo=self.mixRadarInfo)
-      self.radar_state.leadLeft = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=True)
-      self.radar_state.leadRight = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=False)
+      #self.radar_state.leadLeft = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=True)
+      #self.radar_state.leadRight = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=False)
 
-      if self.showRadarInfo: #self.extended_radar_enabled and self.ready:
-        ll,lc,lr = get_lead_side(self.v_ego, self.tracks, sm['modelV2'], sm['lateralPlan'].laneWidth)
+      if True: #self.showRadarInfo: #self.extended_radar_enabled and self.ready:
+        ll, lc, lr,self.radar_state.leadLeft, slef.radar_state.leadRight = get_lead_side(self.v_ego, self.tracks, sm['modelV2'], sm['lateralPlan'].laneWidth)
         self.radar_state.leadsLeft = list(ll)
         self.radar_state.leadsCenter = list(lc)
         self.radar_state.leadsRight = list(lr)
