@@ -329,6 +329,8 @@ def get_leads(tracks):
   return leads
 
 def get_lead_side(v_ego, tracks, md, lane_width):
+  leadLeft = {'status': False}
+  leadRight = {'status': False}
 
   ## SCC레이더는 일단 보관하고 리스트에서 삭제...
   track_scc = tracks.get(0)
@@ -336,12 +338,12 @@ def get_lead_side(v_ego, tracks, md, lane_width):
   #  del tracks[0]
 
   if len(tracks) == 0:
-    return [[],[],[]]
+    return [[],[],[]],leadLeft,leadRight
   if md is not None and len(md.lateralPlannerSolution.x) == TRAJECTORY_SIZE:
     md_y = md.lateralPlannerSolution.y
     md_x = md.lateralPlannerSolution.x
   else:
-    return [[],[],[]]
+    return [[],[],[]],leadLeft,leadRight
 
   leads_center = {}
   leads_left = {}
@@ -368,8 +370,6 @@ def get_lead_side(v_ego, tracks, md, lane_width):
     lc = [leads_center[dRel_min]]
   else:
     lc = {}
-  leadLeft = {'status': False}
-  leadRight = {'status': False}
   if leads_left:
     dRel_min = min(leads_left.keys())
     leadLeft = leads_left[dRel_min]
