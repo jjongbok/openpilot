@@ -137,6 +137,7 @@ public:
     CValueControl(const QString& params, const QString& title, const QString& desc, const QString& icon, int min, int max, int unit = 1);
 
 private:
+    void showEvent(QShowEvent* event) override;
     QPushButton btnplus;
     QPushButton btnminus;
     QLabel label;

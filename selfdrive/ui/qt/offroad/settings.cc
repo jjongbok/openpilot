@@ -765,3 +765,6 @@ void CValueControl::refresh()
     btnminus.setText("－");
     btnplus.setText("＋");
 }
+void CValueControl::showEvent(QShowEvent* event) {
+    printf("showevent...%s\n", m_params.toStdString.c_str());
+}
