@@ -546,7 +546,7 @@ class RadarD:
       #self.radar_state.leadRight = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=False)
 
       if True: #self.showRadarInfo: #self.extended_radar_enabled and self.ready:
-        ll, lc, lr,self.radar_state.leadLeft, slef.radar_state.leadRight = get_lead_side(self.v_ego, self.tracks, sm['modelV2'], sm['lateralPlan'].laneWidth)
+        ll, lc, lr, self.radar_state.leadLeft, self.radar_state.leadRight = get_lead_side(self.v_ego, self.tracks, sm['modelV2'], sm['lateralPlan'].laneWidth)
         self.radar_state.leadsLeft = list(ll)
         self.radar_state.leadsCenter = list(lc)
         self.radar_state.leadsRight = list(lr)
