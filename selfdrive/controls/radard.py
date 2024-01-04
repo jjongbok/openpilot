@@ -338,12 +338,12 @@ def get_lead_side(v_ego, tracks, md, lane_width):
   #  del tracks[0]
 
   if len(tracks) == 0:
-    return [[],[],[]],leadLeft,leadRight
+    return [[],[],[],leadLeft,leadRight]
   if md is not None and len(md.lateralPlannerSolution.x) == TRAJECTORY_SIZE:
     md_y = md.lateralPlannerSolution.y
     md_x = md.lateralPlannerSolution.x
   else:
-    return [[],[],[]],leadLeft,leadRight
+    return [[],[],[],leadLeft,leadRight]
 
   leads_center = {}
   leads_left = {}
@@ -377,7 +377,7 @@ def get_lead_side(v_ego, tracks, md, lane_width):
     dRel_min = min(leads_right.keys())
     leadRight = leads_right[dRel_min]
   #lc = list(leads_center.values())
-  return [ll,lc,lr], leadLeft, leadRight
+  return [ll,lc,lr, leadLeft, leadRight]
   #return [leads_left, leads_center, leads_right]
 
 def match_vision_track_apilot(v_ego, lead_msg, tracks, md, lane_width):
