@@ -667,11 +667,12 @@ class LongitudinalMpc:
     self.fakeCruiseDistance = 0.0
     radar_detected = radarstate.leadOne.status & radarstate.leadOne.radar
 
-    stop_x = x[31]
+    stop_x = x[30]
     self.xStop = self.update_stop_dist(stop_x)
     stop_x = self.xStop
 
-    self.check_model_stopping(v, v_ego, self.xStop, y)
+    #self.check_model_stopping(v, v_ego, self.xStop, y)
+    self.check_model_stopping(v, v_ego, x[-1], y)
     
 
     if self.xState == XState.e2eStop:
@@ -690,7 +691,7 @@ class LongitudinalMpc:
             self.stopDist = stop_dist
           stop_x = 0
           self.fakeCruiseDistance = 0 if self.stopDist > 10.0 else 10.0
-          v_cruise = 0 if v_ego < 0.1 else v_cruise
+          v_cruise = 0 if v_ego < 0.5 else v_cruise
     elif self.xState == XState.e2ePrepare:
       if self.status:
         self.xState = XState.lead
