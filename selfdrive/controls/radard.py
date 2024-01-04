@@ -357,7 +357,7 @@ def get_lead_side(v_ego, tracks, md, lane_width):
       leads_center[c.dRel] = ld
     elif -lane_width < d_y < 0:
       leads_left[c.dRel] = ld
-    elif d_y < lane_width:
+    elif 0 < d_y < lane_width:
       leads_right[c.dRel] = ld
 
   #ll,lr = [[l[k] for k in sorted(list(l.keys()))] for l in [leads_left,leads_right]]
