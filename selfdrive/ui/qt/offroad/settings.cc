@@ -766,5 +766,5 @@ void CValueControl::refresh()
     btnplus.setText("＋");
 }
 void CValueControl::showEvent(QShowEvent* event) {
-    printf("showevent...%s\n", m_params.toStdString.c_str());
+    printf("showevent...%s\n", m_params.toStdString().c_str());
 }
