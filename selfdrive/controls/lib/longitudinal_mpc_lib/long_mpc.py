@@ -493,7 +493,7 @@ class LongitudinalMpc:
     if self.mode == 'acc':
       self.params[:,5] = LEAD_DANGER_FACTOR
 
-      adjustDist = self.trafficStopDistanceAdjust if v_ego > 0.1 else 0
+      adjustDist = self.trafficStopDistanceAdjust if v_ego > 0.1 else -2.0
       x2 = stop_x * np.ones(N+1) + adjustDist
 
 
