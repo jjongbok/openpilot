@@ -964,7 +964,7 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
     constexpr float toKmph = 3.6f;
 
     // Metric speed conversion
-    if (is_metric) {
+    if (is_metric || useSI) {
       lead_speed *= toKmph;
     } else {
     // US imperial conversion
@@ -1220,6 +1220,7 @@ void AnnotatedCameraWidget::updateFrogPilotWidgets(QPainter &p) {
   stoppedEquivalenceStock = scene.stopped_equivalence_stock;
   turnSignalLeft = scene.turn_signal_left;
   turnSignalRight = scene.turn_signal_right;
+  useSI = scene.use_si;
 
   if (!showDriverCamera) {
     if (leadInfo) {
@@ -1426,7 +1427,7 @@ void AnnotatedCameraWidget::drawLeadInfo(QPainter &p) {
   constexpr float toMph = 2.23694f;
 
   // Metric speed conversion
-  if (!is_metric) {
+  if (!(is_metric || useSI)) {
     // US imperial conversion
     unit_a = " ft/s²";
     unit_d = mapOpen ? "ft" : "feet";

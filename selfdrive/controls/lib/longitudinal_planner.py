@@ -101,8 +101,6 @@ class LongitudinalPlanner:
     # FrogPilot variables
     self.params_memory = Params("/dev/shm/params")
 
-    self.is_metric = self.params.get_bool("IsMetric")
-
     self.green_light = False
     self.override_slc = False
     self.previously_driving = False

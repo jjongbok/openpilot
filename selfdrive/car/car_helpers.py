@@ -217,7 +217,7 @@ def crash_log(candidate):
     "LongitudinalTune", "AccelerationProfile", "StoppingDistance", "AggressiveAcceleration", "SmoothBraking", "Model", "NudgelessLaneChange",
     "LaneChangeTime", "LaneDetection", "OneLaneChange", "PauseLateralOnSignal", "SpeedLimitController", "SLCFallback", "SLCPriority", "Offset1",
     "Offset2", "Offset3", "Offset4", "TurnDesires", "VisionTurnControl", "CurveSensitivity", "TurnAggressiveness", "DisableOnroadUploads",
-    "OfflineMode", "ReverseCruise", "TwilsoncoSSH"
+    "OfflineMode", "ReverseCruise"
   ], [
     "EVTable", "LowerVolt", "LockDoors", "SNGHack", "TSS2Tune"
   ], [
