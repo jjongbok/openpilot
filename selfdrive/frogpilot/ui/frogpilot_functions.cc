@@ -143,7 +143,7 @@ void setDefaultParams() {
   for (const auto &[key, value] : defaultValues) {
     if (params.get(key).empty()) {
       params.put(key, value);
-      rebootRequired = true;
+      //rebootRequired = true;
     }
   }
 
