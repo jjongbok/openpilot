@@ -167,7 +167,6 @@ class CruiseButtons:
   DECEL_SET = 3
   MAIN = 5
   CANCEL = 6
-  GAP_DIST = 7
 
 class AccState:
   OFF = 0
