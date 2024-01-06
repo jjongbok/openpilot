@@ -160,6 +160,13 @@ class Track:
       "vLat": float(self.vLat),
     }
 
+  def get_lane_position(self) -> str:
+    if self.yRel > 0 and self.vRel > 5.0:
+      return 'left'
+    elif self.yRel < 0 and self.vRel > 5.0:
+      return 'right'
+    else:
+      return 'front'
 
   def potential_low_speed_lead(self, v_ego: float):
     # stop for stuff in front of you and low speed, even without model confirmation
@@ -285,6 +292,32 @@ def get_lead(v_ego: float, ready: bool, tracks: Dict[int, Track], lead_msg: capn
       # Only choose new track if it is actually closer than the previous one
       if (not lead_dict['status']) or (closest_track.dRel < lead_dict['dRel']):
         lead_dict = closest_track.get_RadarState2(lead_msg.prob, lead_msg, mixRadarInfo)
+
+  return lead_dict
+
+def get_adjacent_lead(v_ego: float, ready: bool, tracks: Dict[int, Track], lead_msg: capnp._DynamicStructReader,
+                      model_v_ego: float, left: bool) -> Dict[str, Any]:
+  # Determine leads, this is where the essential logic happens
+  if len(tracks) > 0 and ready and lead_msg.prob != 0:
+    # Filter tracks based on the specified lane position
+    if left:
+      lane_tracks = {tid: tr for tid, tr in tracks.items() if tr.get_lane_position() == 'left'}
+    else:
+      lane_tracks = {tid: tr for tid, tr in tracks.items() if tr.get_lane_position() == 'right'}
+
+    # Match vision to track for the filtered tracks
+    if lane_tracks:
+      track = match_vision_to_track(v_ego, lead_msg, lane_tracks)
+    else:
+      track = None
+  else:
+    track = None
+
+  lead_dict = {'status': False}
+  if track is not None:
+    lead_dict = track.get_RadarState(lead_msg.prob)
+  elif (track is None) and ready and (lead_msg.prob > .5):
+    lead_dict = get_RadarState_from_vision(lead_msg, v_ego, model_v_ego)
 
   return lead_dict
 
@@ -512,8 +545,8 @@ class RadarD:
         self.radar_state.leadOne = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, low_speed_override=False, mixRadarInfo=self.mixRadarInfo)
         self.radar_state.leadTwo = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[1], model_v_ego, low_speed_override=False, mixRadarInfo=self.mixRadarInfo)
 
-      #self.radar_state.leadLeft = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, low_speed_override=False)
-      #self.radar_state.leadRight = get_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, low_speed_override=False)
+      #self.radar_state.leadLeft = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=True)
+      #self.radar_state.leadRight = get_adjacent_lead(self.v_ego, self.ready, self.tracks, leads_v3[0], model_v_ego, left=False)
 
       if True: #self.showRadarInfo: #self.extended_radar_enabled and self.ready:
         ll, lc, lr, self.radar_state.leadLeft, self.radar_state.leadRight = get_lead_side(self.v_ego, self.tracks, sm['modelV2'], sm['lateralPlan'].laneWidth)

@@ -594,7 +594,6 @@ static void update_state(UIState *s) {
       scene.obstacle_distance = frogpilotLongitudinalPlan.getSafeObstacleDistance();
       scene.obstacle_distance_stock = frogpilotLongitudinalPlan.getSafeObstacleDistanceStock();
       scene.stopped_equivalence = frogpilotLongitudinalPlan.getStoppedEquivalenceFactor();
-      scene.stopped_equivalence_stock = frogpilotLongitudinalPlan.getStoppedEquivalenceFactorStock();
     }
     if (scene.speed_limit_controller) {
       scene.speed_limit = frogpilotLongitudinalPlan.getSlcSpeedLimit();
@@ -670,8 +669,8 @@ void ui_update_params(UIState *s) {
   scene.personalities_via_screen = (params.getInt("AdjustablePersonalities") == 2 || params.getInt("AdjustablePersonalities") == 3);
 
   scene.rotating_wheel = params.getBool("RotatingWheel");
+  scene.screen_brightness = params.getInt("ScreenBrightness");
   scene.speed_limit_controller = params.getBool("SpeedLimitController");
-
   scene.wheel_icon = params.getInt("WheelIcon");
 
 

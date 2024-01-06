@@ -44,8 +44,8 @@ _A_TOTAL_MAX_V = [1.7, 3.2]
 _A_TOTAL_MAX_BP = [20., 40.]
 
 # VTSC variables
-TARGET_LAT_A = 1.9  # m/s^2
 MIN_TARGET_V = 5    # m/s
+TARGET_LAT_A = 1.9  # m/s^2
 
 
 def get_max_accel(v_ego):
@@ -182,12 +182,12 @@ class LongitudinalPlanner:
     # No change cost when user is controlling the speed, or when standstill
     prev_accel_constraint = not (reset_state or sm['carState'].standstill)
 
-    if self.mpc.mode == 'acc':
+    if self.mpc.mode == 'acc' or self.acceleration_profile:
       # Use stock acceleration profiles to handle MTSC/VTSC more precisely
-      # v_cruise_changed = (self.mtsc_target or self.vtsc_target) != v_cruise
-      # if v_cruise_changed:
-        # accel_limits = [A_CRUISE_MIN, get_max_accel(v_ego)]
-      if self.acceleration_profile == 1:
+      v_cruise_changed = (self.mtsc_target or self.vtsc_target) + 1 < v_cruise
+      if v_cruise_changed:
+        accel_limits = [A_CRUISE_MIN, get_max_accel(v_ego)]
+      elif self.acceleration_profile == 1:
         accel_limits = [get_min_accel_eco_tune(v_ego), get_max_accel_eco_tune(v_ego)]
       elif self.acceleration_profile == 3:
         accel_limits = [get_min_accel_sport_tune(v_ego), get_max_accel_sport_tune(v_ego)]
@@ -221,7 +221,7 @@ class LongitudinalPlanner:
     accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired - 0.05)
 
     # FrogPilot variables
-    carState, modelData, radarState = sm['carState'], sm['modelV2'], sm['radarState']
+    carState, modelData = sm['carState'], sm['modelV2']
     enabled = sm['controlsState'].enabled
     standstill = carState.standstill
 
@@ -230,18 +230,16 @@ class LongitudinalPlanner:
 
     # Conditional Experimental Mode
     if (self.conditional_experimental_mode or self.green_light_alert) and self.previously_driving:
-      ConditionalExperimentalMode.update(carState, sm['frogpilotNavigation'], modelData, radarState, v_cruise, v_ego, self.green_light_alert, self.mtsc_target, self.vtsc_target)
+      ConditionalExperimentalMode.update(carState, sm['frogpilotNavigation'], modelData, sm['radarState'], standstill, v_ego)
 
     # Green light alert
     if self.green_light_alert and self.previously_driving:
       stopped_for_light = ConditionalExperimentalMode.red_light_detected and standstill
-
       self.green_light = not stopped_for_light and self.stopped_for_light_previously and not carState.gasPressed
-
       self.stopped_for_light_previously = stopped_for_light
 
     # Update v_cruise for speed limiter functions
-    if not standstill:
+    if v_ego > MIN_TARGET_V and self.previously_driving:
       v_cruise = self.v_cruise_update(carState, enabled, modelData, v_cruise, v_ego)
     else:
       self.mtsc_target = v_cruise
@@ -322,15 +320,14 @@ class LongitudinalPlanner:
     frogpilotLongitudinalPlan.stoppedEquivalenceFactor = self.mpc.stopped_equivalence_factor
     frogpilotLongitudinalPlan.desiredFollowDistance = self.mpc.safe_obstacle_distance - self.mpc.stopped_equivalence_factor
     frogpilotLongitudinalPlan.safeObstacleDistanceStock = self.mpc.safe_obstacle_distance_stock
-    frogpilotLongitudinalPlan.stoppedEquivalenceFactorStock = self.mpc.stopped_equivalence_factor_stock
 
     pm.send('frogpilotLongitudinalPlan', frogpilot_plan_send)
 
   def v_cruise_update(self, carState, enabled, modelData, v_cruise, v_ego):
     # Pfeiferj's Map Turn Speed Controller
     if self.map_turn_speed_controller:
-      self.mtsc_target = np.clip(MapTurnSpeedController.target_speed(v_ego, carState.aEgo), 0, v_cruise)
-      if self.mtsc_target == 0:
+      self.mtsc_target = np.clip(MapTurnSpeedController.target_speed(v_ego, carState.aEgo), MIN_TARGET_V, v_cruise)
+      if self.mtsc_target == MIN_TARGET_V:
         self.mtsc_target = v_cruise
     else:
       self.mtsc_target = v_cruise
@@ -378,8 +375,8 @@ class LongitudinalPlanner:
 
       # Get the target velocity for the maximum curve
       self.vtsc_target = (adjusted_target_lat_a / max_curve) ** 0.5
-      self.vtsc_target = np.clip(self.vtsc_target, 0, v_cruise)
-      if self.vtsc_target == 0:
+      self.vtsc_target = np.clip(self.vtsc_target, MIN_TARGET_V, v_cruise)
+      if self.vtsc_target == MIN_TARGET_V:
         self.vtsc_target = v_cruise
     else:
       self.vtsc_target = v_cruise
