@@ -125,7 +125,7 @@ class DesireHelper:
     if not lateral_active or self.lane_change_timer > LANE_CHANGE_TIME_MAX:
       self.lane_change_state = LaneChangeState.off
       self.lane_change_direction = LaneChangeDirection.none
-    elif one_blinker and below_lane_change_speed and self.turn_desires and blinkerExtMode in [0,2]:
+    elif one_blinker and ((below_lane_change_speed and self.turn_desires and blinkerExtMode in [0]) or blinkerExtMode == 2):
       self.turn_direction = TurnDirection.turnLeft if leftBlinker else TurnDirection.turnRight
       # Set the "turn_completed" flag to prevent lane changes after completing a turn
       self.turn_completed = True
