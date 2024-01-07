@@ -12,6 +12,8 @@ from openpilot.selfdrive.frogpilot.functions.conditional_experimental_mode impor
 from openpilot.selfdrive.frogpilot.functions.map_turn_speed_controller import MapTurnSpeedController
 from openpilot.selfdrive.frogpilot.functions.speed_limit_controller import SpeedLimitController
 
+from openpilot.selfdrive.controls.lib.longitudinal_planner import get_max_accel
+
 # VTSC variables
 MIN_TARGET_V = 5    # m/s
 TARGET_LAT_A = 1.9  # m/s^2
