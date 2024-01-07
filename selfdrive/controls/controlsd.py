@@ -31,6 +31,8 @@ from openpilot.selfdrive.controls.lib.alertmanager import AlertManager, set_offr
 from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.system.hardware import HARDWARE
 
+from openpilot.selfdrive.frogpilot.functions.conditional_experimental_mode import ConditionalExperimentalMode
+
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -84,6 +86,7 @@ class Controls:
     fire_the_babysitter = self.params.get_bool("FireTheBabysitter")
     mute_dm = fire_the_babysitter and self.params.get_bool("MuteDM")
 
+    self.stopped_for_light_previously = False
     ignore = self.sensor_packets + ['testJoystick']
     if SIMULATION:
       ignore += ['driverCameraState', 'managerState']
@@ -467,8 +470,14 @@ class Controls:
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
 
-    if self.sm['frogpilotLongitudinalPlan'].greenLight:
-      self.events.add(FrogPilotEventName.greenLight)
+    # Green light alert
+    if self.green_light_alert and self.enabled:
+      stopped_for_light = ConditionalExperimentalMode.red_light_detected and CS.standstill
+      green_light = not stopped_for_light and self.stopped_for_light_previously and not CS.gasPressed
+      self.stopped_for_light_previously = stopped_for_light
+
+      if green_light:
+        self.events.add(FrogPilotEventName.greenLight)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
@@ -1040,6 +1049,7 @@ class Controls:
     self.custom_sounds = self.params.get_int("CustomSounds") if self.custom_theme else 0
     self.frog_sounds = self.custom_sounds == 1
 
+    self.green_light_alert = self.params.get_bool("GreenLightAlert")
     self.pause_lateral_on_signal = self.params.get_bool("PauseLateralOnSignal")
     self.reverse_cruise_increase = self.params.get_bool("ReverseCruise")
 

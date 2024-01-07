@@ -10,6 +10,8 @@ from openpilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPl
 from openpilot.selfdrive.controls.lib.lateral_planner import LateralPlanner
 import cereal.messaging as messaging
 
+from openpilot.selfdrive.frogpilot.functions.frogpilot_planner import FrogPilotPlanner
+
 def cumtrapz(x, t):
   return np.concatenate([[0], np.cumsum(((x[0:-1] + x[1:])/2) * np.diff(t))])
 
@@ -39,21 +41,20 @@ def plannerd_thread():
 
   debug_mode = bool(int(os.getenv("DEBUG", "0")))
 
-  longitudinal_planner = LongitudinalPlanner(CP)
+  frogpilot_planner = FrogPilotPlanner(CP, params)
+  longitudinal_planner = LongitudinalPlanner(CP, frogpilot_planner)
   lateral_planner = LateralPlanner(CP, debug=debug_mode)
 
   pm = messaging.PubMaster(['longitudinalPlan', 'lateralPlan', 'uiPlan', 'frogpilotLateralPlan', 'frogpilotLongitudinalPlan'])
-  sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'radarState', 'modelV2', 'roadLimitSpeed',
-                            'frogpilotCarControl', 'frogpilotNavigation'],
+  sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'radarState', 'modelV2', 'roadLimitSpeed', 'frogpilotNavigation'],
                            poll=['radarState', 'modelV2', 'roadLimitSpeed'], ignore_avg_freq=['radarState'])
-
-  lateral_planner.update_frogpilot_params(params)
-  longitudinal_planner.update_frogpilot_params()
 
   while True:
     sm.update()
 
     if sm.updated['modelV2']:
+      frogpilot_planner.update(sm)
+      frogpilot_planner.publish(sm, pm)
       lateral_planner.update(sm)
       lateral_planner.publish(sm, pm)
       longitudinal_planner.update(sm)
@@ -61,8 +62,7 @@ def plannerd_thread():
       publish_ui_plan(sm, pm, lateral_planner, longitudinal_planner)
 
     if params_memory.get_bool("FrogPilotTogglesUpdated"):
-      lateral_planner.update_frogpilot_params(params)
-      longitudinal_planner.update_frogpilot_params()
+      frogpilot_planner.update_frogpilot_params(params)
 
 def main():
   plannerd_thread()
