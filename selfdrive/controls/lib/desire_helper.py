@@ -73,6 +73,8 @@ class DesireHelper:
     self.lane_change_wait_timer = 0
 
     self.lane_available_prev = False
+    self.lane_width_left = 0.0
+    self.lane_width_right = 0.0
 
 
   def update(self, carstate, modeldata, lateral_active, lane_change_prob, sm):
