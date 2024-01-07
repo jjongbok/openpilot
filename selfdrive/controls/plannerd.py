@@ -63,6 +63,7 @@ def plannerd_thread():
 
     if params_memory.get_bool("FrogPilotTogglesUpdated"):
       frogpilot_planner.update_frogpilot_params(params)
+      lateral_planner.update_frogpilot_params(params)
 
 def main():
   plannerd_thread()
