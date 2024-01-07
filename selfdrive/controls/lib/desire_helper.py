@@ -94,7 +94,7 @@ class DesireHelper:
     leftBlinker = carstate.leftBlinker or leftBlinkerExt > 0
     rightBlinker = carstate.rightBlinker or rightBlinkerExt > 0
     one_blinker = leftBlinker != rightBlinker
-    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
+    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN if blinkerExtMode == 0 else v_ego < 5. * CV.KPH_TO_MS  ## carrot, when auto turn...
 
     # Calculate left and right lane widths for the blindspot path
     self.lane_width_left = 0
