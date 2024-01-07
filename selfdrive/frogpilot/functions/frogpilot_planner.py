@@ -1,5 +1,6 @@
 import cereal.messaging as messaging
 import numpy as np
+import math
 
 from openpilot.common.conversions import Conversions as CV
 from openpilot.common.numpy_fast import clip, interp
