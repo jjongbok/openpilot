@@ -524,8 +524,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       "Steer Left to Start Lane Change Once Safe",
       "",
       AlertStatus.normal, AlertSize.none,
-      #Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
-      Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
   },
 
   EventName.preLaneChangeRight: {
@@ -533,8 +532,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       "Steer Right to Start Lane Change Once Safe",
       "",
       AlertStatus.normal, AlertSize.none,
-      #Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
-      Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
   },
 
   EventName.laneChangeBlocked: {
@@ -545,16 +543,6 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       #Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
       Priority.LOW, VisualAlert.none, AudibleAlert.bsdWarning, .1),
   },
-
-  EventName.laneChangeRoadEdge: {
-    ET.WARNING: Alert(
-      "Car Detected in Blindspot or RoadEdge",
-      "",
-      AlertStatus.userPrompt, AlertSize.none,
-      #Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .1),
-  },
-  
 
   EventName.laneChange: {
     ET.WARNING: Alert(
