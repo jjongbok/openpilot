@@ -551,10 +551,10 @@ class VCruiseHelper:
       elif self.v_ego_kph_set > self.autoResumeFromGasSpeed > 0:
         if self.cruiseActivate <= 0:
           if self.gas_pressed_value > 0.6 or self.gas_pressed_count_prev > 3.0 / DT_CTRL:
-            pass #기존속도
+            self._add_log("Cruise Activate from Speed(prev. speed)")          
           else:
             v_cruise_kph = self.v_ego_kph_set
-          self._add_log("Cruise Activate from Speed")          
+            self._add_log("Cruise Activate from Speed(cur. speed)")
         self.cruiseActivate = 1
     elif self.brake_pressed_count == -1 and self.softHoldActive == 0:
       if self.autoResumeFromGasSpeed < self.v_ego_kph_set and self.autoResumeFromBrakeReleaseTrafficSign:
