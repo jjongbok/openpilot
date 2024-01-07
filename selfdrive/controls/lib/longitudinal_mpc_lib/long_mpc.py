@@ -650,7 +650,7 @@ class LongitudinalMpc:
 
     if self.stopSignCount * DT_MDL > 0.0:
       self.trafficState = TrafficState.red
-    elif self.startSignCount * DT_MDL > 0.15:
+    elif self.startSignCount * DT_MDL > 0.3:
       self.trafficState = TrafficState.green
     else:
       self.trafficState = TrafficState.off
