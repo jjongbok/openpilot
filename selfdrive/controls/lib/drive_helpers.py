@@ -428,7 +428,7 @@ class VCruiseHelper:
       self.gas_pressed_count = 1 if self.gas_pressed_count < 0 else self.gas_pressed_count + 1
       self.softHoldActive = 0
       if CS.gas > self.gas_pressed_value:
-        self.gas_pressed_max = CS.gas
+        self.gas_pressed_value = CS.gas
       self.gas_pressed_count_prev = self.gas_pressed_count
     else:
       gas_tok = True if 0 < self.gas_pressed_count < 60 else False
@@ -550,7 +550,7 @@ class VCruiseHelper:
         self.cruiseActivate = -1
       elif self.v_ego_kph_set > self.autoResumeFromGasSpeed > 0:
         if self.cruiseActivate <= 0:
-          if self.gas_pressed_max > 0.6 or self.gas_pressed_count_prev > 3.0 / DT_CTRL:
+          if self.gas_pressed_value > 0.6 or self.gas_pressed_count_prev > 3.0 / DT_CTRL:
             pass #기존속도
           else:
             v_cruise_kph = self.v_ego_kph_set
