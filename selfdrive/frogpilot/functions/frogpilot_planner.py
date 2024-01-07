@@ -105,7 +105,7 @@ class FrogPilotPlanner:
       self.accel_limits = [get_min_accel_sport_tune(v_ego), get_max_accel_sport_tune(v_ego)]
     else:
       self.accel_limits = [A_CRUISE_MIN, get_max_accel(v_ego)]
-    self.accel_limits_turns = limit_accel_in_turns(v_ego, carState.steeringAngleDeg, accel_limits, self.CP)
+    self.accel_limits_turns = limit_accel_in_turns(v_ego, carState.steeringAngleDeg, self.accel_limits, self.CP)
 
     # Conditional Experimental Mode
     if self.conditional_experimental_mode:
