@@ -278,7 +278,7 @@ class VCruiseHelper:
     xState = lp.xState
     trafficState = lp.trafficState
 
-    if xState != self.xState and controls.enabled and self.brake_pressed_count < 0 and self.gas_pressed_count < 0: #0:lead, 1:cruise, 2:e2eCruise, 3:e2eStop, 4:e2ePrepare
+    if xState != self.xState and controls.enabled and self.brake_pressed_count < 0 and self.gas_pressed_count < 0: #0:lead, 1:cruise, 2:e2eCruise, 3:e2eStop, 4:e2ePrepare, 5:e2eStopped
       if xState == 3 and CS.vEgo > 5.0:
         self._make_event(controls, EventName.trafficStopping)  # stopping
       elif xState == 4 and self.softHoldActive == 0:

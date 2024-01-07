@@ -1580,7 +1580,7 @@ void DrawApilot::drawPathEnd(const UIState* s, int x, int y, int path_x, int pat
         ui_draw_text(s, x, disp_y, str, disp_size, COLOR_WHITE, BOLD);
     }
     else if (isLongActive()) {
-        if (xState == 3) {      //XState.e2eStop
+        if (xState == 3 || xState == 5) {      //XState.e2eStop, XState.e2eStopped
             if (getVEgo() < 1.0) {
                 sprintf(str, "%s", (lp.getTrafficState() >= 1000) ? "신호오류" : "신호대기");
                 ui_draw_text(s, x, disp_y, str, disp_size, COLOR_WHITE, BOLD);
