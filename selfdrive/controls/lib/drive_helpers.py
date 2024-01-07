@@ -86,6 +86,7 @@ class VCruiseHelper:
     self.frame = 0
     self._log_timer = 0
     self.debugText = ""
+    self.debugTextNoo = ""
     self.debugText2 = ""
     self._first = True
     self.activeAPM = 0
@@ -773,6 +774,10 @@ class VCruiseHelper:
       else:
         nav_turn = False
         nav_direction = 0
+
+      self.debugTextNoo = "N{:.0f}[{}],T{}[{}],{:.0f}{:.0f}/{:.0f}{:.0f}".format(
+        nav_distance, direction, nav_direction, nav_turn,
+        laneChange_dist, laneChange_speed, turn_dist, turn_speed)
 
       blinkerExtState = self.rightBlinkerExtCount + self.rightBlinkerExtCount
       if nav_direction == 1 and nav_turn: # 왼쪽차선변경은 위험하니 턴인경우만 하자, 하지만 지금은 안함.
