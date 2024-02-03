@@ -1,3 +1,10 @@
+당근파일럿 주소 변경
+------
+당근파일럿의 직접설치를 위해 openpilot의 이름으로 주소를 옮깁니다.
+ * https://github.com/openpilot
+
+당근설명
+------
 * [당근설명](CARROT.md)
 * [당근설정](CARROT_SETTINGS.md)
 * [당근맨설명](CARROTMAN.md)
