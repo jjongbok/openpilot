@@ -2,6 +2,15 @@
 ------
 당근파일럿의 직접설치를 위해 openpilot의 이름으로 주소를 옮깁니다.
  * https://github.com/openpilot
+ * carrotpilot에서 openpilot으로 빠르게 변경하는 방법
+   * ssh연결후
+   * nano /data/openpilot/.git/config
+   * 여기서
+   * url = https://github.com/ajouatom/carrotpilot.git
+   * 을
+   * url = https://github.com/ajouatom/openpilot.git
+   * 이렇게 변경하면...
+   * 즉시 변경됩니다..
 
 당근설명
 ------
